@@ -3171,7 +3171,7 @@ signed   int  SiLabs_API_TER_Tuner_status           (SILABS_FE_Context* front_en
 ************************************************************************************************************************/
 signed   int  SiLabs_API_TER_Tuner_Loop_Through     (SILABS_FE_Context* front_end,    signed   int enable)
 {
-  int return_value;
+  int return_value = 0;
 #ifdef    TERRESTRIAL_FRONT_END
   SILABS_TER_TUNER_Context *tuner_ter;
   tuner_ter = NULL;
@@ -5643,7 +5643,7 @@ signed   int  SiLabs_API_Get_TS_Dividers            (SILABS_FE_Context *front_en
 ************************************************************************************************************************/
 signed   int  Silabs_API_TS_Tone_Cancel             (SILABS_FE_Context* front_end,    signed   int on_off)
 {
-    signed   int return_code;
+    signed   int return_code = 0;
 #ifdef    TERRESTRIAL_FRONT_END
     unsigned int DIV_A;
     unsigned int DIV_B;
@@ -8702,9 +8702,11 @@ signed   int  SiLabs_API_Store_SPI_FW               (SILABS_FE_Context *front_en
 }
 signed   int  SiLabs_API_Store_TER_TUNER_FW         (SILABS_FE_Context *front_end,    firmware_struct fw_table[], signed   int nbLines) {
   signed   int stored; stored = 0;
-#ifdef    Si2183_COMPATIBLE
+#ifdef TERRESTRIAL_FRONT_END
+#ifdef Si2183_COMPATIBLE
   if (front_end->chip ==   0x2183 ) { return SiLabs_TER_Tuner_Store_FW(front_end->Si2183_FE->tuner_ter, fw_table, nbLines); }
 #endif /* Si2183_COMPATIBLE */
+#endif /* TERRESTRIAL_FRONT_END */
   return stored*nbLines;
 }
 signed   int  SiLabs_API_Auto_Detect_Demods         (L0_Context* i2c, signed   int *Nb_FrontEnd, signed   int demod_code[4], signed   int demod_add[4], char *demod_string[4]) {
