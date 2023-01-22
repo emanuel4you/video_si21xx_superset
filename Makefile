@@ -70,8 +70,9 @@ OBJFILES += $(DTV_DIR)/SiLabs_API_L3_Wrapper.o
 TER_TUNER=Si2141
 TER_TUNER_2=Si2144
 
-ccflags-y+=-DSi2141_TUNER_COUNT=2
-ccflags-y+=-DSi2144_TUNER_COUNT=2
+#TER_TUNER=none
+#TER_TUNER_2=none
+
 # ---<porting>--- End of TER tuner selection
 #-------------------------------------------------------------
 
@@ -93,6 +94,8 @@ ccflags-y+=-DDEMOD_DVB_C2
 # for DVBC2
 #ccflags-y+=-DDEMOD_MCNS # for DVBC_ANNEX_B
 #ccflags-y+=-DDEMOD_ISDB_T # for ISDBT
+ccflags-y+=-DSi2141_TUNER_COUNT=2
+ccflags-y+=-DSi2144_TUNER_COUNT=2
 # ---<porting>--- End of TER standards selection
 #-------------------------------------------------------------
 # include path for silabs_superset TER files
