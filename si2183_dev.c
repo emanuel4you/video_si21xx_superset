@@ -80,15 +80,15 @@ static int si2183_dt_probe(struct platform_device *pdev) {
 		return -1;
 	}
 	printk(KERN_INFO "%s_dev: %s: - tuner_i2c_bus = <%d>\n", DRIVER_NAME, __FUNCTION__, tuner_i2c_bus);
-	/* Get an adapter */
-#if 1
+	
 	my_si2183_config.reset_gpiod = gpiod_get(dev, "reset", GPIOD_OUT_LOW);
 	if(IS_ERR(my_si2183_config.reset_gpiod)) {
 		printk(KERN_ERR "%s_dev: %s: Could not setup the GPIO\n", DRIVER_NAME, __FUNCTION__);
 		return -1;
 	}
 	printk(KERN_INFO "%s_dev: %s: setup the reset GPIO\n", DRIVER_NAME, __FUNCTION__);
-#endif
+
+	/* Get an adapter */
 	si2183_i2c_adapter = i2c_get_adapter(tuner_i2c_bus);
 	if(si2183_i2c_adapter == NULL) {
 		printk(KERN_ERR "%s_dev: %s: Error: si2183_i2c_adapter NULL!\n", DRIVER_NAME, __FUNCTION__);
