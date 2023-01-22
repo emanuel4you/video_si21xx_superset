@@ -10,9 +10,8 @@ I2C_DIR := SKYWORKS_SUPERSET/Si_I2C
 DTV_DIR := SKYWORKS_SUPERSET/Si2183
 SAT_DIR := SKYWORKS_SUPERSET/SAT
 TER_DIR := SKYWORKS_SUPERSET/TER
-
 #=============================================================
-#include path for silabs_superset internal files
+# include path for silabs_superset internal files
 #-------------------------------------------------------------
 ccflags-y+= -I$(MODULE)
 ccflags-y+= -I$(MODULE)/$(I2C_DIR)
@@ -25,7 +24,7 @@ ccflags-y+= -Wall
 ccflags-y+= -DSILABS_SUPERSET
 ccflags-y+= -DFRONT_END_COUNT=2
 #ccflags-y+= -DCONFIG_MACROS -DSILABS_EVB_MACROS
-#ccflags-y+= -DTS_CROSSBAR
+ccflags-y+= -DTS_CROSSBAR
 #=============================================================
 #=============================================================
 # +++<porting>+++ possible FWs to load in demodulators
@@ -42,12 +41,6 @@ ccflags-y+= -DSi2183_B60_COMPATIBLE
 ccflags-y+= -DSi2183_B5A_COMPATIBLE
 ccflags-y+= -DSi2183_A55_COMPATIBLE
 ccflags-y+= -DSi2183_A50_COMPATIBLE
-# ---<porting>--- End of FWs selection
-#=============================================================
-#=============================================================
-
-
-
 # ---<porting>--- End of FWs selection
 #=============================================================
 #=============================================================
@@ -85,30 +78,29 @@ ccflags-y+=-DSi2144_TUNER_COUNT=2
 ifneq (none, $(TER_TUNER))
 #-------------------------------------------------------------
 # +++<porting>+++TER standards selection
-#(comment unused standards)
+# (comment unused standards)
 # Restrictions related to the TER standards selection:
-#If DVB-T2 support is required, DVB-T support is also mandatory
-#If DVB-C2 support is required, DVB-C support is also mandatory
-#If MCNS support is required, DVB-C support is also mandatory
-ccflags-y+=-DTERRESTRIAL_FRONT_END
-
+# If DVB-T2 support is required, DVB-T support is also mandatory
+# If DVB-C2 support is required, DVB-C support is also mandatory
+# If MCNS support is required, DVB-C support is also mandatory
 ccflags-y+=-DDEMOD_DVB_T
 # for DVBT
 ccflags-y+=-DDEMOD_DVB_T2 
 # for DVBT2
-#ccflags-y+=-DDEMOD_DVB_C # for DVBC_ANNEX_AC
+ccflags-y+=-DDEMOD_DVB_C
+# for DVBC_ANNEX_AC
 ccflags-y+=-DDEMOD_DVB_C2 
 # for DVBC2
 #ccflags-y+=-DDEMOD_MCNS # for DVBC_ANNEX_B
 #ccflags-y+=-DDEMOD_ISDB_T # for ISDBT
 # ---<porting>--- End of TER standards selection
 #-------------------------------------------------------------
-#include path for silabs_superset TER files
+# include path for silabs_superset TER files
 ccflags-y+= -I$(MODULE)/$(TER_DIR)
 ccflags-y+= -I$(MODULE)/$(TER_DIR)/$(TER_TUNER)
 # TER compilation flags
 ccflags-y+= -DTERRESTRIAL_FRONT_END -DTER_TUNER_SILABS -DTER_TUNER_$(TER_TUNER)
-#object files for TER tuner
+# object files for TER tuner
 OBJFILES += $(TER_DIR)/$(TER_TUNER)/$(TER_TUNER)_L1_API.o
 OBJFILES += $(TER_DIR)/$(TER_TUNER)/$(TER_TUNER)_L1_Commands.o
 OBJFILES += $(TER_DIR)/$(TER_TUNER)/$(TER_TUNER)_L1_Properties.o
@@ -120,24 +112,23 @@ endif
 
 ifneq (none, $(TER_TUNER_2))
 #-------------------------------------------------------------
-#include path for silabs_superset TER files
+# include path for silabs_superset TER files
 ccflags-y+= -I$(MODULE)/$(TER_DIR)/$(TER_TUNER_2)
 # TER compilation flags
 ccflags-y+= -DTER_TUNER_$(TER_TUNER_2)
-#object files for TER tuner
+# object files for TER tuner
 OBJFILES += $(TER_DIR)/$(TER_TUNER_2)/$(TER_TUNER_2)_L1_API.o
 OBJFILES += $(TER_DIR)/$(TER_TUNER_2)/$(TER_TUNER_2)_L1_Commands.o
 OBJFILES += $(TER_DIR)/$(TER_TUNER_2)/$(TER_TUNER_2)_L1_Properties.o
 OBJFILES += $(TER_DIR)/$(TER_TUNER_2)/$(TER_TUNER_2)_Properties_Strings.o
 OBJFILES += $(TER_DIR)/$(TER_TUNER_2)/$(TER_TUNER_2)_User_Properties.o
 OBJFILES += $(TER_DIR)/$(TER_TUNER_2)/$(TER_TUNER_2)_L2_API.o
-OBJFILES += $(TER_DIR)/SiLabs_TER_Tuner_API.o
 endif
 #-------------------------------------------------------------
 # End of TER compilation flags
 #=============================================================
 #=============================================================
-#SAT compilation flags
+# SAT compilation flags
 #-------------------------------------------------------------
 # +++<porting>+++SAT tuner selection
 # (use 'none' for no_SAT compilation)
@@ -154,31 +145,26 @@ ifneq (none, $(SAT_TUNER))
 #-------------------------------------------------------------
 # +++<porting>+++SAT standards selection
 # (only one option: comment DVB-S2X if unused)
-ccflags-y+=-DSATELLITE_FRONT_END
-
 ccflags-y+= -DDEMOD_DVB_S_S2_DSS 
 # for DVBS, DVBS2 and DSS
 ccflags-y+= -DDEMOD_DVB_S2X 
-ccflags-y+= -DTS_CROSSBAR
 # if support for DVB-S2X is required
 # ---<porting>--- End of SAT standards selection
 #-------------------------------------------------------------
-#include path for silabs_superset SAT files
+# include path for silabs_superset SAT files
 ccflags-y+= -I$(MODULE)/$(SAT_DIR)
+ccflags-y+= -I$(MODULE)/$(SAT_DIR)/$(SAT_TUNER)
 #ccflags-y+= -I$(MODULE)/$(SAT_DIR)/Unicable
 # no Unicable support
-ccflags-y+= -I$(MODULE)/$(SAT_DIR)/$(SAT_TUNER)
 # SAT compilation flags
 ccflags-y+= -DSATELLITE_FRONT_END -DSAT_TUNER_SILABS -DSAT_TUNER_$(SAT_TUNER)
-ccflags-y+= -DNO_FLOATS_ALLOWED
 #ccflags-y+= -DUNICABLE_COMPATIBLE
 # no Unicable support
-
-#object file for SAT tuner
+# object file for SAT tuner
 OBJFILES += $(SAT_DIR)/$(SAT_TUNER)/SiLabs_L1_RF_$(SAT_TUNER)_API.o
-#object file for SAT tuner wrapper
+# object file for SAT tuner wrapper
 OBJFILES += $(SAT_DIR)/SiLabs_SAT_Tuner_API.o
-#object file for SAT Unicable
+# object file for SAT Unicable
 #OBJFILES += $(SAT_DIR)/Unicable/SiLabs_Unicable_API.o
 # no Unicable support
 endif
@@ -191,14 +177,13 @@ endif
 # End of SAT compilation flags
 #=============================================================
 
-ccflags-y+= -DLINUX_CUSTOMER_I2C -DNO_WIN32
+ccflags-y+= -DLINUX_CUSTOMER_I2C -DNO_WIN32 -DNO_FLOATS_ALLOWED
 
 #OBJFILES :=
 OBJFILES += si2183_dev.o si2183_fe.o
 
 obj-m += si2183.o
 si2183-objs += $(OBJFILES)
-
 
 #-------------------------------------------------------------
 # build
