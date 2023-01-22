@@ -4119,8 +4119,13 @@ signed   int  SiLabs_API_TER_Broadcast_I2C          (SILABS_FE_Context *front_en
   signed   int i;
   signed   int c;
   signed   int res;
+#ifdef LINUX_CUSTOMER_I2C
+  signed   int *TER_tuner_init_done[FRONT_END_COUNT];
+  SILABS_TER_TUNER_Context *silabs_tuners[FRONT_END_COUNT];
+#else
   signed   int *TER_tuner_init_done[front_end_count];
   SILABS_TER_TUNER_Context *silabs_tuners[front_end_count];
+#endif
   SiTRACE_X("API CALL INIT  : SiLabs_API_TER_Broadcast_I2C         (front_ends, %d);\n", front_end_count);
   c = 0;
   for (i = 0; i < front_end_count; i++) {
@@ -4356,7 +4361,7 @@ signed   int  SiLabs_API_TER_Tuner_AGC_Input        (SILABS_FE_Context *front_en
 ************************************************************************************************************************/
 signed   int  SiLabs_API_TER_Tuner_GPIOs            (SILABS_FE_Context *front_end,    signed   int gpio1_mode, signed   int gpio2_mode)
 {
-  SiTRACE("API CALL CONFIG: SiLabs_API_TER_Tuner_GPIOs (front_end, %d, %d, %d);\n", gpio1_mode, gpio2_mode);
+  SiTRACE("API CALL CONFIG: SiLabs_API_TER_Tuner_GPIOs (front_end, %d, %d);\n", gpio1_mode, gpio2_mode);
 #ifdef    TERRESTRIAL_FRONT_END
 #ifdef    Si2183_COMPATIBLE
   if (front_end->chip ==   0x2183 ) { SiLabs_TER_Tuner_GPIOS ( front_end->Si2183_FE->tuner_ter, gpio1_mode, gpio2_mode); return 1;}
@@ -5430,21 +5435,21 @@ signed   int  SiLabs_API_TS_Config                  (SILABS_FE_Context *front_en
   SiTRACE("SiLabs_API_TS_Config clock_config %d, gapped %d, serial_clk_inv %d, parallel_clk_inv %d, ts_err_inv %d, serial_pin %d\n", clock_config, gapped, serial_clk_inv, parallel_clk_inv, ts_err_inv, serial_pin);
 #ifdef    Si2183_COMPATIBLE
   if (front_end->chip ==   0x2183 ) {
-         if (clock_config == 0)     { front_end->Si2183_FE->demod->prop->dd_ts_mode.clock                = Si2183_DD_TS_MODE_PROP_CLOCK_AUTO_ADAPT; }
+if (clock_config == 0)     { front_end->Si2183_FE->demod->prop->dd_ts_mode.clock                = Si2183_DD_TS_MODE_PROP_CLOCK_AUTO_ADAPT; }
     else if (clock_config == 1)     { front_end->Si2183_FE->demod->prop->dd_ts_mode.clock                = Si2183_DD_TS_MODE_PROP_CLOCK_AUTO_FIXED; }
     else                            { front_end->Si2183_FE->demod->prop->dd_ts_mode.clock                = Si2183_DD_TS_MODE_PROP_CLOCK_MANUAL;
                                       front_end->Si2183_FE->demod->prop->dd_ts_freq.req_freq_10khz       = clock_config/10;                         }
 
-         if (gapped == 1)           { front_end->Si2183_FE->demod->prop->dd_ts_mode.clk_gapped_en        = Si2183_DD_TS_MODE_PROP_CLK_GAPPED_EN_ENABLED  ; }
+    if      (gapped == 1)           { front_end->Si2183_FE->demod->prop->dd_ts_mode.clk_gapped_en        = Si2183_DD_TS_MODE_PROP_CLK_GAPPED_EN_ENABLED  ; }
     else if (gapped == 0)           { front_end->Si2183_FE->demod->prop->dd_ts_mode.clk_gapped_en        = Si2183_DD_TS_MODE_PROP_CLK_GAPPED_EN_DISABLED ; }
 
-         if (serial_clk_inv == 1)   { front_end->Si2183_FE->demod->prop->dd_ts_setup_ser.ts_clk_invert   = Si2183_DD_TS_SETUP_SER_PROP_TS_CLK_INVERT_INVERTED    ; }
+    if      (serial_clk_inv == 1)   { front_end->Si2183_FE->demod->prop->dd_ts_setup_ser.ts_clk_invert   = Si2183_DD_TS_SETUP_SER_PROP_TS_CLK_INVERT_INVERTED    ; }
     else if (serial_clk_inv == 0)   { front_end->Si2183_FE->demod->prop->dd_ts_setup_ser.ts_clk_invert   = Si2183_DD_TS_SETUP_SER_PROP_TS_CLK_INVERT_NOT_INVERTED; }
 
-         if (parallel_clk_inv == 1) { front_end->Si2183_FE->demod->prop->dd_ts_setup_par.ts_clk_invert   = Si2183_DD_TS_SETUP_PAR_PROP_TS_CLK_INVERT_INVERTED    ; }
+    if      (parallel_clk_inv == 1) { front_end->Si2183_FE->demod->prop->dd_ts_setup_par.ts_clk_invert   = Si2183_DD_TS_SETUP_PAR_PROP_TS_CLK_INVERT_INVERTED    ; }
     else if (parallel_clk_inv == 0) { front_end->Si2183_FE->demod->prop->dd_ts_setup_par.ts_clk_invert   = Si2183_DD_TS_SETUP_PAR_PROP_TS_CLK_INVERT_NOT_INVERTED; }
 
-         if (ts_err_inv == 1)       { front_end->Si2183_FE->demod->prop->dd_ts_mode.ts_err_polarity      = Si2183_DD_TS_MODE_PROP_TS_ERR_POLARITY_INVERTED     ; }
+    if      (ts_err_inv == 1)       { front_end->Si2183_FE->demod->prop->dd_ts_mode.ts_err_polarity      = Si2183_DD_TS_MODE_PROP_TS_ERR_POLARITY_INVERTED     ; }
     else if (ts_err_inv == 0)       { front_end->Si2183_FE->demod->prop->dd_ts_mode.ts_err_polarity      = Si2183_DD_TS_MODE_PROP_TS_ERR_POLARITY_NOT_INVERTED ; }
 
     if (serial_pin < 8)             { front_end->Si2183_FE->demod->prop->dd_ts_mode.serial_pin_selection = serial_pin; }
@@ -9125,3 +9130,4 @@ char*         SiLabs_API_TAG_TEXT                   (void) { return (char *)"V2.
 #ifdef    __cplusplus
 }
 #endif /* __cplusplus */
+ 

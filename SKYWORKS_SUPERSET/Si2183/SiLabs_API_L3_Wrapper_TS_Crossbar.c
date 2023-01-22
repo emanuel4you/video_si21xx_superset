@@ -177,11 +177,11 @@ signed   int   SiLabs_TS_Crossbar_TS_Status       (SILABS_TS_Crossbar *ts_crossb
       ts_crossbar->ts_1_signal = SILABS_TS_CROSSBAR_TS_B;
     }
 
-         if (ts_1_source->Si2183_FE->demod->prop->dd_ts_mode.mode == Si2183_DD_TS_MODE_PROP_MODE_SERIAL   ) { ts_crossbar->ts_1->ts_mode   = SILABS_TS_SERIAL;   }
+    if      (ts_1_source->Si2183_FE->demod->prop->dd_ts_mode.mode == Si2183_DD_TS_MODE_PROP_MODE_SERIAL   ) { ts_crossbar->ts_1->ts_mode   = SILABS_TS_SERIAL;   }
     else if (ts_1_source->Si2183_FE->demod->prop->dd_ts_mode.mode == Si2183_DD_TS_MODE_PROP_MODE_PARALLEL ) { ts_crossbar->ts_1->ts_mode   = SILABS_TS_PARALLEL; }
     else if (ts_1_source->Si2183_FE->demod->prop->dd_ts_mode.mode == Si2183_DD_TS_MODE_PROP_MODE_TRISTATE ) { ts_crossbar->ts_1->ts_mode   = SILABS_TS_TRISTATE; }
 
-         if (ts_2_source->Si2183_FE->demod->prop->dd_ts_mode.mode == Si2183_DD_TS_MODE_PROP_MODE_SERIAL   ) { ts_crossbar->ts_2->ts_mode   = SILABS_TS_SERIAL;   }
+    if      (ts_2_source->Si2183_FE->demod->prop->dd_ts_mode.mode == Si2183_DD_TS_MODE_PROP_MODE_SERIAL   ) { ts_crossbar->ts_2->ts_mode   = SILABS_TS_SERIAL;   }
     else if (ts_2_source->Si2183_FE->demod->prop->dd_ts_mode.mode == Si2183_DD_TS_MODE_PROP_MODE_PARALLEL ) { ts_crossbar->ts_2->ts_mode   = SILABS_TS_PARALLEL; }
     else if (ts_2_source->Si2183_FE->demod->prop->dd_ts_mode.mode == Si2183_DD_TS_MODE_PROP_MODE_TRISTATE ) { ts_crossbar->ts_2->ts_mode   = SILABS_TS_TRISTATE; }
 

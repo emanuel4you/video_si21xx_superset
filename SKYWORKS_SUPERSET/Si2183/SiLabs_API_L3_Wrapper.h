@@ -316,7 +316,9 @@ extern "C" {
      #ifndef   SAT_TUNER_RDA5812
       #ifndef   SAT_TUNER_RDA5815
        #ifndef   SAT_TUNER_RDA5816S
+        #ifndef   SAT_TUNER_RDA5816SD
      "If you get a compilation error on this line, it means that no satellite tuner has been selected. Please define SAT_TUNER_xxxx at project-level!";
+        #endif /* SAT_TUNER_RDA5816SD */
        #endif /* SAT_TUNER_RDA5816S */
       #endif /* SAT_TUNER_RDA5815  */
      #endif /* SAT_TUNER_RDA5812  */

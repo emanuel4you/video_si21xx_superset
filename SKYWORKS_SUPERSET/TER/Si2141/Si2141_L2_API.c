@@ -25,7 +25,11 @@ limitations under the License.
    Tag:  ROM61_1_1_build_11_V0.7
    Date: June 14 2019
 ****************************************************************************************/
-#include <string.h>
+#ifdef LINUX_CUSTOMER_I2C
+  #include <linux/string.h>
+#else
+  #include <string.h>
+#endif
 /* Si2141 API Defines */
 /* define this if using the DTV video filter */
 #undef USING_DLIF_FILTER
@@ -191,7 +195,11 @@ signed   int  Si2141_Store_FW                   (L1_Si2141_Context *api,    firm
   signed   int stored, line, i; line = i = stored = 0;
 
   api->nbLines  = nbLines;
+#ifdef LINUX_CUSTOMER_I2C
+  api->fw_table = (firmware_struct*)krealloc(api->fw_table, sizeof(firmware_struct)*nbLines, GFP_KERNEL);
+#else
   api->fw_table = (firmware_struct*)realloc(api->fw_table, sizeof(firmware_struct)*nbLines);
+#endif
 
   for (line = 0; line < nbLines; line++) {
       api->fw_table[line].firmware_len = fw_table[line].firmware_len;
@@ -1237,6 +1245,7 @@ int Si2141_L2_VCO_Blocking_PreTune    (L1_Si2141_Context *tuners[], int tuner_nu
 int Si2141_L2_VCO_Blocking_PostTune   (L1_Si2141_Context *tuners[], int tuner_num, int tuner_count)
 {
 
+#if 0
   int  ((*Tuner_Block_VCO_ptr[3])( )) = {Si2141_Tuner_Block_VCO, Si2141_Tuner_Block_VCO2, Si2141_Tuner_Block_VCO3};
   int errcode;
   int vco_dest[]={0,0,0,0};
@@ -1245,6 +1254,15 @@ int Si2141_L2_VCO_Blocking_PostTune   (L1_Si2141_Context *tuners[], int tuner_nu
   int c;
   int vco_code;
 
+#else
+  signed   int  ((*Tuner_Block_VCO_ptr[3])(L1_Si2141_Context *api, int vco_code)) = {Si2141_Tuner_Block_VCO, Si2141_Tuner_Block_VCO2, Si2141_Tuner_Block_VCO3};
+  signed   int errcode;
+  signed   int vco_dest[]={0,0,0,0};
+  signed   int vco_fn[]={0,0,0,0};
+  signed   int i;
+  signed   int c;
+  signed   int vco_code;
+#endif
 /* if only using 1 tuner then no need for this function */
   if (tuner_count == 1)
   {

@@ -34,7 +34,7 @@ limitations under the License.
 
 /******************************************************************************/
 /* TER Tuner FEF management selection (possible values are defined above) */
-/* NB : This selection is the ‘preferred’ solution.                           */
+/* NB : This selection is the 'preferred' solution.                           */
 /* The code will use more compilation flags to slect the final mode based     */
 /*  on what the TER tuner can actually do.                                    */
 /******************************************************************************/

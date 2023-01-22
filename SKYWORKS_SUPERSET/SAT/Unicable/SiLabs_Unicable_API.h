@@ -88,13 +88,19 @@ limitations under the License.
 #define UNICABLE_YES                1
 #define UNICABLE_NO                 0
 
-#define UNICABLE_TRACES(...) printf(__VA_ARGS__);
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
+  #define UNICABLE_PRINTF pr_info
+#else  /* LINUX_ST_SDK2_I2C */
+  #define UNICABLE_PRINTF printf
+#endif /* LINUX_ST_SDK2_I2C */
 
-  #ifdef   SiTRACES
-#define UNICABLE_LOGS(...)  printf(__VA_ARGS__);
-  #else  /* SiTRACES */
-#define UNICABLE_LOGS(...)  printf(__VA_ARGS__);
-  #endif /* SiTRACES */
+#define UNICABLE_TRACES(...) UNICABLE_PRINTF(__VA_ARGS__);
+
+#ifdef   SiTRACES
+  #define UNICABLE_LOGS(...)  UNICABLE_PRINTF(__VA_ARGS__);
+#else  /* SiTRACES */
+  #define UNICABLE_LOGS(...)  UNICABLE_PRINTF(__VA_ARGS__);
+#endif /* SiTRACES */
 
 /* type pointer to function to write byte to diseq bus */
 typedef signed int  (*UNICABLE_DISEQ_PREPARE_FUNC) (void*, signed int sequence_length, unsigned char *sequence_buffer, unsigned char cont_tone, unsigned char tone_burst, unsigned char burst_sel, unsigned char end_seq, signed int *flags);

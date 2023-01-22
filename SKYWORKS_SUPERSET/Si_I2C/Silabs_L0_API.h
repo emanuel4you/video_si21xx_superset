@@ -36,13 +36,23 @@ limitations under the License.
 
 #ifdef    NO_WIN32
   /* Linux: includes for non-Windows platform */
+#ifdef LINUX_CUSTOMER_I2C
+  #include <linux/module.h>
+  #include <linux/kernel.h>
+  #include <linux/string.h>
+  #include <linux/delay.h>
+  #include <asm/string.h>
+  #include "linux/i2c.h"
+  #include "si2183.h"
+#endif /* LINUX_CUSTOMER_I2C */
+
 #ifdef    LINUX_ST_SDK2_I2C
   #include "i2c_wrapper.h"
   STCHIP_Error_t Chip_I2cWrite   (STCHIP_Handle_t hChip, u_int8_t ChipAddress,    unsigned char *Data, int NbData);
   STCHIP_Error_t Chip_I2cRead    (STCHIP_Handle_t hChip, u_int8_t ChipAddress,    unsigned char *Data, int NbData);
 #endif /* LINUX_ST_SDK2_I2C */
 
-#ifndef   LINUX_ST_SDK2_I2C
+#if !defined(LINUX_ST_SDK2_I2C) && !defined(LINUX_CUSTOMER_I2C)
   #include <stdlib.h>
   #include <stdio.h>
   #include <time.h>
@@ -89,7 +99,7 @@ limitations under the License.
 #endif /* LINUX_ST_SDK2_I2C */
 
 /* <porting> Replace  CUSTOM_PRINTF with your print-out function.*/
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
   #define CUSTOM_PRINTF pr_info
 #else  /* LINUX_ST_SDK2_I2C */
   #define CUSTOM_PRINTF printf
@@ -128,7 +138,7 @@ limitations under the License.
   /* WARNING : the minimal features mode disables tracing functions in the extern file                     */
   #define SiTRACES_FULL                  1
   #define SiTRACES_MINIMAL               0
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
   #define SiTRACES_FEATURES     SiTRACES_MINIMAL
 #else  /* LINUX_ST_SDK2_I2C */
   #define SiTRACES_FEATURES     SiTRACES_FULL

@@ -415,7 +415,7 @@ limitations under the License.
     <firmware> With FW 5_0b15 on X50 parts (full download for ES parts, patch for production parts)
     <firmware> With FW 5_5b3  on X55 parts (except Si2180)
     <new_feature>[FW_from_table] In Si2183_L2_SW_Init/Si2183_PowerUpWithPatch: Adding the capability to load FW from a table, either over I2C or over SPI.
-      NB: In Si2183_L2_SW_Init: The corresponding lines using ‘realloc’ need to be commented if dynamic memory allocation is not allowed.
+      NB: In Si2183_L2_SW_Init: The corresponding lines using 'realloc' need to be commented if dynamic memory allocation is not allowed.
 
  As from V0.0.7.0:
     <wrapper> Wrapper V2.5.4
@@ -1444,11 +1444,11 @@ signed   int Si2183_WAKEUP              (L1_Si2183_Context *api)
                             Si2183_POWER_UP_CMD_CTSIEN_DISABLE,
                             Si2183_POWER_UP_CMD_WAKE_UP_WAKE_UP);
 
-         if (api->cmd->start_clk.clk_mode == Si2183_START_CLK_CMD_CLK_MODE_CLK_CLKIO  ) { SiTRACE ("Si2183_START_CLK_CMD_CLK_MODE_CLK_CLKIO\n"  );}
+    if (api->cmd->start_clk.clk_mode == Si2183_START_CLK_CMD_CLK_MODE_CLK_CLKIO  ) { SiTRACE ("Si2183_START_CLK_CMD_CLK_MODE_CLK_CLKIO\n"  );}
     else if (api->cmd->start_clk.clk_mode == Si2183_START_CLK_CMD_CLK_MODE_CLK_XTAL_IN) { SiTRACE ("Si2183_START_CLK_CMD_CLK_MODE_CLK_XTAL_IN\n");}
     else if (api->cmd->start_clk.clk_mode == Si2183_START_CLK_CMD_CLK_MODE_XTAL       ) { SiTRACE ("Si2183_START_CLK_CMD_CLK_MODE_XTAL\n"       );}
 
-         if (api->cmd->power_up.reset == Si2183_POWER_UP_CMD_RESET_RESET  ) { SiTRACE ("Si2183_POWER_UP_CMD_RESET_RESET\n"  );}
+    if (api->cmd->power_up.reset == Si2183_POWER_UP_CMD_RESET_RESET  ) { SiTRACE ("Si2183_POWER_UP_CMD_RESET_RESET\n"  );}
     else if (api->cmd->power_up.reset == Si2183_POWER_UP_CMD_RESET_RESUME ) { SiTRACE ("Si2183_POWER_UP_CMD_RESET_RESUME\n");}
 
     if (return_code != NO_Si2183_ERROR ) {
@@ -3131,8 +3131,13 @@ char          Si2183_L2_SW_Init            (Si2183_L2_Context *front_end
     front_end->demod->spi_table = NULL;
     front_end->demod->spi_buffer_size = 2048;  /* Needs to be at least 1024 for the current FW portions. Contact Skyworks in case you need a smaller size */
     /* <porting> if not allowed to use dynamic memory allocation, comment the following lines. */
+#ifdef LINUX_CUSTOMER_I2C
+    front_end->demod->fw_table = (firmware_struct*)krealloc(front_end->demod->fw_table , sizeof(firmware_struct)*front_end->demod->nbLines, GFP_KERNEL);
+    front_end->demod->spi_table = (unsigned char *)krealloc(front_end->demod->spi_table, sizeof(unsigned char)*front_end->demod->nbSpiBytes, GFP_KERNEL);
+#else
     front_end->demod->fw_table = (firmware_struct*)realloc(front_end->demod->fw_table , sizeof(firmware_struct)*front_end->demod->nbLines);
     front_end->demod->spi_table = (unsigned char *)realloc(front_end->demod->spi_table, sizeof(unsigned char)*front_end->demod->nbSpiBytes);
+#endif
     front_end->misc_infos = 0x00100000; /* trylock traced*/
     /* <porting> end of dynamic memory allocation */
     SiTRACE("Si2183_L2_SW_Init complete\n");
@@ -4915,6 +4920,7 @@ signed   int   Si2183_L2_lock_to_carrier   (Si2183_L2_Context *front_end
     Si2183_L1_DD_UNCOR(front_end->demod, Si2183_DD_UNCOR_CMD_RST_CLEAR);
     SiTRACE ("Si2183_lock_to_carrier 'lock'  took %3d ms\n"        , searchDelay);
 #ifdef    DEMOD_DVB_T2
+    plp_index = plp_index;
 #ifdef    SiTRACES
     if (front_end->demod->rsp->dd_status.modulation == Si2183_DD_MODE_PROP_MODULATION_DVBT2) {
       Si2183_L1_DVBT2_STATUS   (front_end->demod, Si2183_DVBT2_STATUS_CMD_INTACK_OK);
@@ -5764,7 +5770,7 @@ signed   int  Si2183_L2_Channel_Seek_Init  (Si2183_L2_Context *front_end, signed
   if (front_end->demod->rsp->get_rev.mcm_die == Si2183_GET_REV_RESPONSE_MCM_DIE_DIE_A) {
       SiTRACE(" die A");
   } else if (front_end->demod->rsp->get_rev.mcm_die == Si2183_GET_REV_RESPONSE_MCM_DIE_DIE_B) {
-      SiTRACE("%s die B");
+      SiTRACE(" die B");
   }
   SiTRACE(" Running FW %c_%cb%d\n", front_end->demod->rsp->get_rev.cmpmajor
          , front_end->demod->rsp->get_rev.cmpminor

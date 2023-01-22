@@ -740,20 +740,36 @@ signed   int   SiLabs_TER_Tuner_Broadcast_I2C        (SILABS_TER_TUNER_Context *
 #endif /* TER_TUNER_Si2124 */
 #ifdef    TER_TUNER_Si2141
   if (silabs_tuners[0]->ter_tuner_code == 0x2141) {
+#ifdef LINUX_CUSTOMER_I2C
+    //L1_Si2141_Context **Si2141_tuners = kmalloc_array(tuner_count, sizeof(L1_Si2141_Context), GFP_KERNEL);
+    L1_Si2141_Context *Si2141_tuners[Si2141_TUNER_COUNT];
+#else
     L1_Si2141_Context *Si2141_tuners[tuner_count];
+#endif
     for (i = 0; i < tuner_count; i++) {
       Si2141_tuners[i] = silabs_tuners[i]->Si2141_Tuner[silabs_tuners[i]->tuner_index];
     }
     return_code = Si2141_PowerUpUsingBroadcastI2C(Si2141_tuners, tuner_count);
+#ifdef LINUX_CUSTOMER_I2C
+    //kfree(Si2141_tuners);
+#endif
   }
 #endif /* TER_TUNER_Si2141 */
 #ifdef    TER_TUNER_Si2144
   if (silabs_tuners[0]->ter_tuner_code == 0x2144) {
+#ifdef LINUX_CUSTOMER_I2C
+    //L1_Si2144_Context **Si2144_tuners = kmalloc_array(tuner_count, sizeof(L1_Si2144_Context), GFP_KERNEL);
+    L1_Si2144_Context *Si2144_tuners[Si2144_TUNER_COUNT];
+#else
     L1_Si2144_Context *Si2144_tuners[tuner_count];
+#endif
     for (i = 0; i < tuner_count; i++) {
       Si2144_tuners[i] = silabs_tuners[i]->Si2144_Tuner[silabs_tuners[i]->tuner_index];
     }
     return_code = Si2144_PowerUpUsingBroadcastI2C(Si2144_tuners, tuner_count);
+#ifdef LINUX_CUSTOMER_I2C
+    //kfree(Si2144_tuners);
+#endif
   }
 #endif /* TER_TUNER_Si2144 */
 #ifdef    TER_TUNER_Si2148B

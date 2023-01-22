@@ -30,14 +30,18 @@ limitations under the License.
     #define   SiLEVEL          1
     #define   SiTAG            api->i2c->tag
 #endif /* TER_TUNER_SILABS */
-#include <string.h>
+#ifdef LINUX_CUSTOMER_I2C
+  #include <linux/string.h>
+#else
+  #include <string.h>
+#endif
 /* Si2144 API Defines */
 /* define this if using the DTV video filter */
 #undef USING_DLIF_FILTER
 /************************************************************************************************************************/
 /* Si2144 API Specific Includes */
 #include "Si2144_L2_API.h"               /* Include file for this code */
-#include "Si2144_Firmware_2_1_build_5.h"       /* firmware compatible with Si2144-A20 marking */
+#include "Si2144_firmware_2_1_build_5.h"       /* firmware compatible with Si2144-A20 marking */
 #define Si2144_BYTES_PER_LINE 8
 #ifdef USING_DLIF_FILTER
 #include "write_DLIF_video_coeffs.h"   /* .h file from custom Video filter Tool output */

@@ -557,19 +557,20 @@ void  traceToDestination     (char* trace) {
   Porting:    Not compiled if SiTRACES is not defined in Silabs_L0_API.h.
 ************************************************************************************************************************/
 const char *SiTraceConfiguration   (const char *config) {
+    unsigned int i;
 #if       SiTRACES_FEATURES == SiTRACES_FULL
     FILE *file;
     time_t rawtime;
     struct tm * timeinfo;
     char c;
-    unsigned int i;
+    /* unsigned int i; */
     char *pArray;
 #endif /* SiTRACES_FEATURES == SiTRACES_FULL */
     char saved;
     int loop, nbArgs, trace_configuration_message, lenTraceBuffer, destination, start, origine;
     char *array[50];
     char *pBuffer;
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
     char *config_string;
 #endif /* LINUX_ST_SDK2_I2C */
 
@@ -585,7 +586,7 @@ const char *SiTraceConfiguration   (const char *config) {
     sprintf(trace_message, "%s", config);
     if (!strncmp(trace_message,"traces",6)) {
         /* strtok splitting input and storing all items, returning first item */
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
         config_string = trace_message +7;
         array[0] = strsep(&config_string," ");
 #else  /* LINUX_ST_SDK2_I2C */
@@ -595,7 +596,7 @@ const char *SiTraceConfiguration   (const char *config) {
 
         /* retrieving all remaining items */
         for(loop=1;loop<50;loop++) {
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
             array[loop] = strsep(&config_string," ");
 #else  /* LINUX_ST_SDK2_I2C */
             array[loop] = strtok(NULL," ");
@@ -976,11 +977,16 @@ int  L0_ErrorMessage (void) {
   Porting:    Needs to use the final system call for time retrieval
 ************************************************************************************************************************/
 int     system_wait          (int time_ms) {
+#ifdef LINUX_CUSTOMER_I2C
+  msleep(time_ms);
+  return system_time();
+#else /* LINUX_CUSTOMER_I2C */
   unsigned long ticks1, ticks2;
   ticks1=system_time() + time_ms;
   ticks2=ticks1;
   while (ticks2<=ticks1) {ticks2=system_time();}
   return (int)ticks2;
+#endif /* LINUX_CUSTOMER_I2C */
 }
 /************************************************************************************************************************
   system_time function
@@ -1007,9 +1013,13 @@ int     system_time          (void)        {
   getnstimeofday(&tv);
   time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_nsec) / 1000000 ; // convert tv_sec & tv_usec to millisecond
 #else  /* LINUX_ST_SDK2_I2C */
+#ifdef LINUX_CUSTOMER_I2C
+  return jiffies_to_msecs(jiffies);
+#else /* LINUX_CUSTOMER_I2C */
   struct timeval  tv;
   gettimeofday(&tv, NULL);
   time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
+#endif /* LINUX_CUSTOMER_I2C */
 #endif /* LINUX_ST_SDK2_I2C */
   return (unsigned long) time_in_mill;
 #endif /* NO_WIN32 */
@@ -1147,7 +1157,7 @@ void    L0_Init              (L0_Context *i2c) {
 
   i2c->address             = 0;
   i2c->indexSize           = 0;
-  i2c->connectionType      = SIMU;
+  i2c->connectionType      = CUSTOMER; /* SIMU; */
   i2c->trackWrite          = 0;
   i2c->trackRead           = 0;
   i2c->mustReadWithoutStop = 0;
@@ -1403,6 +1413,11 @@ int     L0_ReadBytes         (L0_Context* i2c, unsigned int iI2CIndex, int iNbBy
       and on failure nbReadBytes = 0.
       data bytes will be stored in pucDataBuffer.
       */
+
+      nbReadBytes = 0;
+      if(!I2C_ReadBytes(i2c->address>>1, i2c->indexSize, iNbBytes, pucDataBuffer)){
+          nbReadBytes = iNbBytes;
+      }
       break;
     case SIMU:
       nbReadBytes = L0_SimulatorRead (i2c->indexSize, pucAddressBuffer, iNbBytes, pucDataBuffer);
@@ -1513,6 +1528,11 @@ int     L0_WriteBytes        (L0_Context* i2c, unsigned int iI2CIndex, int iNbBy
         and on failure write_error is incremented.
         */
 
+        if(0 == I2C_WriteByte(i2c->address>>1, i2c->indexSize, iNbBytes, pucDataBuffer)) {
+          nbWrittenBytes = iNbBytes + i2c->indexSize;
+        } else {
+          write_error++;
+        }
         break;
     case LINUX_I2C:
         #ifdef    LINUX_I2C_Capability
@@ -1634,7 +1654,11 @@ int     L0_ReadRawBytes      (L0_Context* i2c, unsigned int iI2CIndex, int iNbBy
 int     L0_WriteRawBytes     (L0_Context* i2c, unsigned int iI2CIndex, int iNbBytes, unsigned char *pbtDataBuffer) {
   int i,r,ret;
   unsigned char *pbtBuffer;
+#ifdef LINUX_CUSTOMER_I2C
+  unsigned char *myBufferBytes = kmalloc_array(iNbBytes + i2c->indexSize, sizeof(unsigned char), GFP_KERNEL);
+#else
   unsigned char myBufferBytes[iNbBytes + i2c->indexSize];
+#endif
   rawI2C->address        = i2c->address;
   rawI2C->trackRead      = i2c->trackRead;
   rawI2C->trackWrite     = i2c->trackWrite;
@@ -1651,6 +1675,9 @@ int     L0_WriteRawBytes     (L0_Context* i2c, unsigned int iI2CIndex, int iNbBy
   }
   /* Write all bytes as a single buffer */
   ret = L0_WriteBytes (rawI2C, 0, iNbBytes + i2c->indexSize, pbtBuffer) - i2c->indexSize;
+#ifdef LINUX_CUSTOMER_I2C
+  kfree(myBufferBytes);
+#endif
   return ret;
 }
 /************************************************************************************************************************
@@ -1875,7 +1902,7 @@ int     L0_ReadString        (L0_Context* i2c, char *readString, unsigned char *
     input = readString;
 
     /* strtok splitting input and storing all items, returning first item */
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
     array[0] = strsep(&input," ");
 #else  /* LINUX_ST_SDK2_I2C */
     array[0] = strtok(input," ");
@@ -1883,7 +1910,7 @@ int     L0_ReadString        (L0_Context* i2c, char *readString, unsigned char *
     if(array[0]==NULL) {return 0;}
     /* retrieving all remaining items */
     for(loop=1;loop<50;loop++) {
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
         array[loop] = strsep(&input," ");
 #else  /* LINUX_ST_SDK2_I2C */
         array[loop] = strtok(NULL," ");
@@ -1927,7 +1954,7 @@ int     L0_ReadString        (L0_Context* i2c, char *readString, unsigned char *
   Returns:    The number of bytes written
 ************************************************************************************************************************/
 int     L0_WriteString       (L0_Context* i2c, char *writeString) {
-#ifndef    LINUX_ST_SDK2_I2C
+#if !defined(LINUX_ST_SDK2_I2C) && !defined(LINUX_CUSTOMER_I2C)
     int i;
 #endif /* LINUX_ST_SDK2_I2C */
     int writeBytes;
@@ -1950,7 +1977,7 @@ int     L0_WriteString       (L0_Context* i2c, char *writeString) {
     input = writeString;
 
     /* strtok splitting input and storing all items, returning first item */
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
     array[0] = strsep(&input," ");
 #else  /* LINUX_ST_SDK2_I2C */
     array[0] = strtok(input," ");
@@ -1958,7 +1985,7 @@ int     L0_WriteString       (L0_Context* i2c, char *writeString) {
     if(array[0]==NULL) {return 0;}
     /* retrieving all remaining items */
     for(loop=1;loop<50;loop++) {
-#ifdef    LINUX_ST_SDK2_I2C
+#if defined(LINUX_ST_SDK2_I2C) || defined(LINUX_CUSTOMER_I2C)
         array[loop] = strsep(&input," ");
 #else  /* LINUX_ST_SDK2_I2C */
         array[loop] = strtok(NULL," ");
@@ -1978,7 +2005,7 @@ int     L0_WriteString       (L0_Context* i2c, char *writeString) {
     indexSize = 0;
     iI2CIndex = 0;
     iNbBytes  = nbArgs-1;
-#ifndef   LINUX_ST_SDK2_I2C
+#if !defined(LINUX_ST_SDK2_I2C) && !defined(LINUX_CUSTOMER_I2C)
     pbtDataBuffer = (unsigned char*)malloc(sizeof(unsigned char)*iNbBytes);
     for (i=0; i<iNbBytes; i++) { pbtDataBuffer[i] = bytes[i+1]; }
     L0_SetAddress   (i2c, address, indexSize);
@@ -2203,3 +2230,4 @@ int     L0_Cypress_Cget      (const char *cmd, const char *text, double dval, do
 #ifdef    __cplusplus
 }
 #endif /* __cplusplus */
+
