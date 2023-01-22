@@ -458,7 +458,7 @@ int           L1_RF_RDA5816SD_Tune            (RDA5816SD_Context *context, int r
    }
    context->i2c->trackRead = context->i2c->trackWrite;
    context->RF = rf_kHz;
-#ifndef LINUX_CUSTOMER_I2C
+#ifndef NO_FLOATS_ALLOWED
    RDA5816SD_Set(context, (context->RF + 500)/1000.0, context->LPF/1000.0);
 #else
    RDA5816SD_Set(context, (context->RF + 500)/1000, context->LPF/1000);
@@ -475,7 +475,7 @@ int           L1_RF_RDA5816SD_LPF             (RDA5816SD_Context *context, int l
       SiTRACE("RDA5816SD requested lpf_khz %d smaller than min, set to min\n", lpf_khz);
       lpf_khz = 4000;
     }
-#ifndef LINUX_CUSTOMER_I2C
+#ifndef NO_FLOATS_ALLOWED
     context->LPF = (int)((lpf_khz + 500.0));
 #else
     context->LPF = (int)((lpf_khz + 500));
@@ -484,7 +484,7 @@ int           L1_RF_RDA5816SD_LPF             (RDA5816SD_Context *context, int l
 
   SiTRACE("RDA5816SD lpf %d kHz\n", context->LPF);
 
-#ifndef LINUX_CUSTOMER_I2C
+#ifndef NO_FLOATS_ALLOWED
   RDA5816SD_Set(context, (context->RF + 500)/1000.0, context->LPF/1000.0);
 #else
    RDA5816SD_Set(context, (context->RF + 500)/1000, context->LPF/1000);
@@ -521,7 +521,7 @@ int           L1_RF_RDA5816SD_RSSI            (RDA5816SD_Context *context, int o
   unsigned char gain_stage;
   unsigned char band;
   
-#ifndef LINUX_CUSTOMER_I2C
+#ifndef NO_FLOATS_ALLOWED
   double        vga_gain, total_gain;
   /* gain band/gain_stage:    0     1     2     3     4     5     6     7     8     9    10    11    12    13   14&15 */
   double gain[6][15] = {
@@ -581,7 +581,7 @@ int           L1_RF_RDA5816SD_RSSI            (RDA5816SD_Context *context, int o
   else                             { band = 1; }
 
   RDA5816SD_IIC_Read(context, 0xb7, &vga);
-#ifndef LINUX_CUSTOMER_I2C
+#ifndef NO_FLOATS_ALLOWED
   vga_gain = vga*30.0/255;
 
 #else
@@ -592,7 +592,7 @@ int           L1_RF_RDA5816SD_RSSI            (RDA5816SD_Context *context, int o
   if (0) {
     SiTRACE("RDA5816SD stage_code %02x%02x %02x%02x %02x%02x -> stage_code 0x%06x\n", st1, pre, st2, post, i2v, filter, stage_code);
     SiTRACE("RDA5816SD st1 %d, pre %d, st2 %d, post %d, i2v %d, filter %d -> stage_code 0x%06x -> gain_stage %d\n", st1, pre, st2, post, i2v, filter, stage_code, gain_stage);
-#ifndef LINUX_CUSTOMER_I2C
+#ifndef NO_FLOATS_ALLOWED
     SiTRACE("RDA5816SD vga %d -> vga_gain %f\n", vga, vga_gain);
     SiTRACE("RDA5816SD RSSI = gain[%d][%d] + vga_gain = %f + %f = %f\n", band-1, gain_stage, gain[band-1][gain_stage], vga_gain, total_gain);
 #else
@@ -601,7 +601,7 @@ int           L1_RF_RDA5816SD_RSSI            (RDA5816SD_Context *context, int o
 #endif
   }
 
-#ifndef LINUX_CUSTOMER_I2C
+#ifndef NO_FLOATS_ALLOWED
   return  other_gain-total_gain;
 #else
   return ((10 * other_gain) - total_gain) / 10;
