@@ -82,7 +82,7 @@ static int si2183_dt_probe(struct platform_device *pdev) {
 	
 	my_si2183_config.reset_gpiod = gpiod_get(dev, "reset", GPIOD_OUT_LOW);
 	if(IS_ERR(my_si2183_config.reset_gpiod)) {
-		printk(KERN_ERR "%s_dev: %s: Could not setup the GPIO\n", DRIVER_NAME, __FUNCTION__);
+		printk(KERN_ERR "%s_dev: %s: Error: Could not setup the GPIO\n", DRIVER_NAME, __FUNCTION__);
 		return -1;
 	}
 	printk(KERN_INFO "%s_dev: %s: setup the reset GPIO\n", DRIVER_NAME, __FUNCTION__);

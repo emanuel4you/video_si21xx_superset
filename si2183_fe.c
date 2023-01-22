@@ -94,7 +94,7 @@ int I2C_ReadBytes(unsigned char clientAddr,
 	
 	for(n = 0; iNbBytes > n; n++) {
 		if (si2183_reg_read(clientAddr, clientRegAddr, &pucDataBuffer[n]) < 0) {
-			printk(KERN_ERR "%s_fe: %s: can not read from i2c device %#0x\n", DRIVER_NAME, __FUNCTION__, clientAddr);
+			printk(KERN_ERR "%s_fe: %s: Error: can not read from i2c device %#0x\n", DRIVER_NAME, __FUNCTION__, clientAddr);
 			err--;
 			break;
 		}
@@ -126,7 +126,7 @@ int I2C_WriteByte( unsigned char clientAddr,
 	for(n = 0; iNbBytes > n; n++) {
 		err = si2183_reg_write(clientAddr, clientRegAddr, pucDataBuffer[n]);
 		if (err < 1) {
-			printk(KERN_ERR "%s_fe: %s: can not write to i2c device %#0x\n", DRIVER_NAME, __FUNCTION__, clientAddr);
+			printk(KERN_ERR "%s_fe: %s: Error: can not write to i2c device %#0x\n", DRIVER_NAME, __FUNCTION__, clientAddr);
 			err--;
 			break;
 
