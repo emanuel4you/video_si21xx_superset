@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2022 Emanuel Strobel <emanuel@ihad.tv>
+ */
+
+/dts-v1/;
+
+/ {
+	dvb {
+		compatible = "amlogic,dvb";
+		label = "dvb";
+		status = "okay";
+		tuner_i2c_bus = <0>;
+		reset-gpios = <&gpio GPIOA_7 GPIO_ACTIVE_HIGH>;
+	};
+};

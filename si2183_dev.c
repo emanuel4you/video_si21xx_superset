@@ -20,9 +20,8 @@ struct dvb_adapter myadapter;
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 
 static struct si2183_config my_si2183_config = {
-	/* the demodulator's i2c address */
-	.demod_address_0 = 0x64,
-	.demod_address_1 = 0x67,
+	/* the demodulators's i2c addresses */
+	.demod_address = { 0x64, 0x67 },
 	.reset_gpiod = NULL,
 };
 
@@ -162,10 +161,8 @@ static int __init si2183_fe_init(void) {
 static void __exit si2183_fe_exit(void) {
 	dvb_unregister_adapter(&myadapter);
 	dvb_unregister_frontend(myfrontend);
-	dvb_frontend_detach(myfrontend);
 	gpiod_put(my_si2183_config.reset_gpiod);
 	
-	//fe_exit();
 	printk(KERN_INFO "%s_dev: %s: - Unload driver", DRIVER_NAME, __FUNCTION__);
 	platform_driver_unregister(&si2183_fe_driver);
 }

@@ -24,8 +24,7 @@
 
 static struct i2c_adapter *si2183_i2c_adapter = NULL;
 static struct gpio_desc *si2183_reset_gpiod = NULL;
-unsigned char si2183_demod_address_0;
-unsigned char si2183_demod_address_1;
+unsigned char si2183_demod_address[2];
 struct mutex lock;
 
 /* define how many front-ends will be used */
@@ -147,8 +146,6 @@ int I2C_WriteByte( unsigned char clientAddr,
 
 static void si2183_reset(void)
 {
-	
-	
 	gpiod_set_value(si2183_reset_gpiod, 0);
 	msleep(300);
 	printk(KERN_INFO "%s_fe: %s: set reset gpiod to 0\n", DRIVER_NAME, __FUNCTION__);
@@ -172,9 +169,7 @@ static int si2183_read_status(struct dvb_frontend *fe,
 	if(s == 1)
 	{
 		*status = FE_HAS_LOCK|FE_HAS_SIGNAL|FE_HAS_CARRIER|FE_HAS_VITERBI|FE_HAS_SYNC;
-	}
-	else
-	{
+	} else {
 		*status = FE_TIMEDOUT;
 	}
 	
@@ -321,7 +316,6 @@ struct dvb_frontend *si2183_ofdm_attach(void)
 	state->frontend.demodulator_priv = state;
 	return &state->frontend;
 }
-EXPORT_SYMBOL(si2183_ofdm_attach);
 
 static const struct dvb_frontend_ops si2183_qpsk_ops;
 
@@ -342,47 +336,43 @@ struct dvb_frontend *si2183_qpsk_attach(void)
 	state->frontend.demodulator_priv = state;
 	return &state->frontend;
 }
-EXPORT_SYMBOL(si2183_qpsk_attach);
 
 static const struct dvb_frontend_ops si2183_qam_ops;
 
 struct dvb_frontend *si2183_attach(const struct si2183_config *config, struct i2c_adapter *i2c)
 {
-	//struct device *dev = config->dev;
 	/* test buffers r/w */
 	unsigned char registerDataBuffer[8];
 	unsigned char DataBuffer[13];
 	
 	struct si2183_state *state = NULL;
+	si2183_demod_address[0] = config->demod_address[0];
+	si2183_demod_address[1] = config->demod_address[1];
+	si2183_reset_gpiod = config->reset_gpiod;
+	si2183_i2c_adapter = i2c;
+	
 	printk(KERN_INFO "%s_fe: %s: - dummy frontend added!\n", DRIVER_NAME, __FUNCTION__);
 	
-	si2183_demod_address_0 = config->demod_address_0;
-	si2183_demod_address_1 = config->demod_address_1;
-	si2183_reset_gpiod = config->reset_gpiod;
+	if(si2183_i2c_adapter == NULL) {
+		printk(KERN_ERR "%s_fe: %s: Error: si2183_i2c_adapter NULL!\n", DRIVER_NAME, __FUNCTION__);
+	}
 	
 	mutex_init(&lock);
 	
 	si2183_reset();
 	
-	si2183_i2c_adapter = i2c;
-	if(si2183_i2c_adapter == NULL) {
-		printk(KERN_ERR "%s_fe: %s: Error: si2183_i2c_adapter NULL!\n", DRIVER_NAME, __FUNCTION__);
-	}
-	
-	printk(KERN_INFO "%s_fe: %s: - i2c clients (demodulator) at 0x%x and at 0x%x!\n", DRIVER_NAME, __FUNCTION__, si2183_demod_address_0, si2183_demod_address_1);
+	printk(KERN_INFO "%s_fe: %s: - i2c clients (demodulator) at 0x%x and at 0x%x!\n", DRIVER_NAME, __FUNCTION__, si2183_demod_address[0], si2183_demod_address[1]);
 	
 	printk(KERN_INFO "%s_fe: %s: - read test:\n", DRIVER_NAME, __FUNCTION__);
-	I2C_ReadBytes(si2183_demod_address_0, 0x09, 8, registerDataBuffer);
+	I2C_ReadBytes(si2183_demod_address[0], 0x09, 8, registerDataBuffer);
 	
 	memcpy(DataBuffer, "\xc0\x12\x00\x0c\x00\x0d\x16\x00\x00\x00\x00\x00\x00", 13);
 	printk(KERN_INFO "%s_fe: %s: - write test:\n", DRIVER_NAME, __FUNCTION__);
-	I2C_WriteByte(si2183_demod_address_0, 0x6, 13, DataBuffer);
+	I2C_WriteByte(si2183_demod_address[0], 0x6, 13, DataBuffer);
 	
 	printk(KERN_INFO "%s_fe: %s: - read test:\n", DRIVER_NAME, __FUNCTION__);
-	I2C_ReadBytes(si2183_demod_address_1, 0x09, 8, registerDataBuffer);
+	I2C_ReadBytes(si2183_demod_address[1], 0x09, 8, registerDataBuffer);
 
-
-	//SiLabs_API_SW_Init(&front_end, 0x64, TUNER_ADDRESS_TER, TUNER_ADDRESS_SAT);
 	SiLabs_API_SW_Init(&front_end, 0x64, TUNER_ADDRESS_TER, TUNER_ADDRESS_SAT);
 	SiLabs_API_SW_Init(&front_end, 0x67, TUNER_ADDRESS_TER, TUNER_ADDRESS_SAT);
 	SiLabs_API_switch_to_standard(&front_end, SILABS_DVB_S2, 1);
@@ -400,7 +390,6 @@ struct dvb_frontend *si2183_attach(const struct si2183_config *config, struct i2
 	state->frontend.demodulator_priv = state;
 	return &state->frontend;
 }
-EXPORT_SYMBOL(si2183_attach);
 
 struct dvb_frontend *si2183_qam_attach(void)
 {
@@ -420,7 +409,6 @@ struct dvb_frontend *si2183_qam_attach(void)
 	state->frontend.demodulator_priv = state;
 	return &state->frontend;
 }
-EXPORT_SYMBOL(si2183_qam_attach);
 
 static const struct dvb_frontend_ops si2183_ofdm_ops = {
 	.delsys = { SYS_DVBT },
@@ -532,8 +520,3 @@ static const struct dvb_frontend_ops si2183_qpsk_ops = {
 	.set_voltage = si2183_set_voltage,
 	.set_tone = si2183_set_tone,
 };
-
-void fe_exit(void) {
-	gpiod_put(si2183_reset_gpiod);
-	printk(KERN_INFO "%s_fe: %s: - put gpiod", DRIVER_NAME, __FUNCTION__);
-}

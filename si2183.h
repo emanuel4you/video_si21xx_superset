@@ -21,16 +21,12 @@ struct si2183_state {
 
 struct si2183_config {
 	/* the demodulator's i2c address */
-	unsigned char demod_address_0;
-	unsigned char demod_address_1;
+	unsigned char demod_address[2];
 	/* the demodulator's reset gpios */
 	struct gpio_desc *reset_gpiod;
 	struct device *dev;
-	
-	
 };
 
-void fe_exit(void);
 struct dvb_frontend *si2183_ofdm_attach(void);
 struct dvb_frontend *si2183_qpsk_attach(void);
 struct dvb_frontend *si2183_qam_attach(void);
