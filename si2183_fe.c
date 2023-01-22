@@ -147,6 +147,8 @@ int I2C_WriteByte( unsigned char clientAddr,
 
 static void si2183_reset(void)
 {
+	
+	
 	gpiod_set_value(si2183_reset_gpiod, 0);
 	msleep(300);
 	printk(KERN_INFO "%s_fe: %s: set reset gpiod to 0\n", DRIVER_NAME, __FUNCTION__);
@@ -243,13 +245,14 @@ static int si2183_sleep(struct dvb_frontend *fe)
 static int si2183_init(struct dvb_frontend *fe)
 {
 	int standard;
-	standard=SILABS_DVB_S2;
+	standard = SILABS_DVB_S2;
+	
+	printk(KERN_INFO "%s_fe: %s: - init\n", DRIVER_NAME, __FUNCTION__);
 	
 	si2183_reset();
 	SiLabs_API_SW_Init(&front_end, 0x64, TUNER_ADDRESS_TER, TUNER_ADDRESS_SAT);
+	SiLabs_API_SW_Init(&front_end, 0x67, TUNER_ADDRESS_TER, TUNER_ADDRESS_SAT);
 	SiLabs_API_switch_to_standard(&front_end, standard, 1);
-	
-	printk(KERN_INFO "%s_fe: %s: - init\n", DRIVER_NAME, __FUNCTION__);
 	
 	return 0;
 }
@@ -341,7 +344,7 @@ struct dvb_frontend *si2183_qpsk_attach(void)
 }
 EXPORT_SYMBOL(si2183_qpsk_attach);
 
-static const struct dvb_frontend_ops si2183_ops;
+static const struct dvb_frontend_ops si2183_qam_ops;
 
 struct dvb_frontend *si2183_attach(const struct si2183_config *config, struct i2c_adapter *i2c)
 {
@@ -355,14 +358,8 @@ struct dvb_frontend *si2183_attach(const struct si2183_config *config, struct i2
 	
 	si2183_demod_address_0 = config->demod_address_0;
 	si2183_demod_address_1 = config->demod_address_1;
-
-#if 1
-	si2183_reset_gpiod = gpiod_get(config->dev, "reset", GPIOD_OUT_LOW);
-	if(IS_ERR(si2183_reset_gpiod)) {
-		printk(KERN_ERR "%s_fe: %s: Could not setup the GPIOD\n", DRIVER_NAME, __FUNCTION__);
-	} else
-		printk(KERN_INFO "%s_fe: %s: setup the GPIOD\n", DRIVER_NAME, __FUNCTION__);
-#endif
+	si2183_reset_gpiod = config->reset_gpiod;
+	
 	mutex_init(&lock);
 	
 	si2183_reset();
@@ -386,8 +383,8 @@ struct dvb_frontend *si2183_attach(const struct si2183_config *config, struct i2
 
 
 	//SiLabs_API_SW_Init(&front_end, 0x64, TUNER_ADDRESS_TER, TUNER_ADDRESS_SAT);
-	SiLabs_API_SW_Init(&front_end, 0x64, 0, TUNER_ADDRESS_SAT);
-	SiLabs_API_SW_Init(&front_end, 0x67, 0, TUNER_ADDRESS_SAT);
+	SiLabs_API_SW_Init(&front_end, 0x64, TUNER_ADDRESS_TER, TUNER_ADDRESS_SAT);
+	SiLabs_API_SW_Init(&front_end, 0x67, TUNER_ADDRESS_TER, TUNER_ADDRESS_SAT);
 	SiLabs_API_switch_to_standard(&front_end, SILABS_DVB_S2, 1);
 	
 	/* allocate memory for the internal state */
@@ -397,15 +394,13 @@ struct dvb_frontend *si2183_attach(const struct si2183_config *config, struct i2
 
 	/* create dvb_frontend */
 	memcpy(&state->frontend.ops,
-		   &si2183_ops,
+		   &si2183_qpsk_ops,
 		   sizeof(struct dvb_frontend_ops));
 
 	state->frontend.demodulator_priv = state;
 	return &state->frontend;
 }
 EXPORT_SYMBOL(si2183_attach);
-
-static const struct dvb_frontend_ops si2183_qam_ops;
 
 struct dvb_frontend *si2183_qam_attach(void)
 {
@@ -538,51 +533,7 @@ static const struct dvb_frontend_ops si2183_qpsk_ops = {
 	.set_tone = si2183_set_tone,
 };
 
-static const struct dvb_frontend_ops si2183_ops = {
-	.delsys = { SYS_DVBS },
-	.info = {
-		.name			= "si2183 DVB-S",
-		.frequency_min_hz	=  950 * MHz,
-		.frequency_max_hz	= 2150 * MHz,
-		.frequency_stepsize_hz	= 250 * kHz,
-		.frequency_tolerance_hz	= 29500 * kHz,
-		.symbol_rate_min	= 1000000,
-		.symbol_rate_max	= 45000000,
-		.caps = FE_CAN_INVERSION_AUTO |
-			FE_CAN_FEC_1_2 |
-			FE_CAN_FEC_2_3 |
-			FE_CAN_FEC_3_4 |
-			FE_CAN_FEC_5_6 |
-			FE_CAN_FEC_7_8 |
-			FE_CAN_FEC_AUTO |
-			FE_CAN_QPSK
-	},
-
-	.release = si2183_release,
-
-	.init = si2183_init,
-	.sleep = si2183_sleep,
-
-	.set_frontend = si2183_set_frontend,
-	.get_frontend = si2183_get_frontend,
-
-	.read_status = si2183_read_status,
-	.read_ber = si2183_read_ber,
-	.read_signal_strength = si2183_read_signal_strength,
-	.read_snr = si2183_read_snr,
-	.read_ucblocks = si2183_read_ucblocks,
-
-	.set_voltage = si2183_set_voltage,
-	.set_tone = si2183_set_tone,
-};
-
-
 void fe_exit(void) {
 	gpiod_put(si2183_reset_gpiod);
-	printk(KERN_INFO "%s_f: %s: - put gpiod", DRIVER_NAME, __FUNCTION__);
+	printk(KERN_INFO "%s_fe: %s: - put gpiod", DRIVER_NAME, __FUNCTION__);
 }
-/*
-MODULE_DESCRIPTION("DVB SI2183 Frontend");
-MODULE_AUTHOR("Emu");
-MODULE_LICENSE("GPL");
-*/

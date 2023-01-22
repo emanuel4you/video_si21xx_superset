@@ -24,7 +24,7 @@ struct si2183_config {
 	unsigned char demod_address_0;
 	unsigned char demod_address_1;
 	/* the demodulator's reset gpios */
-	//struct gpio_desc *reset_gpio;
+	struct gpio_desc *reset_gpiod;
 	struct device *dev;
 	
 	
