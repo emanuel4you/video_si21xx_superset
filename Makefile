@@ -165,17 +165,22 @@ ccflags-y+= -DTS_CROSSBAR
 #-------------------------------------------------------------
 #include path for silabs_superset SAT files
 ccflags-y+= -I$(MODULE)/$(SAT_DIR)
-ccflags-y+= -I$(MODULE)/$(SAT_DIR)/Unicable
+#ccflags-y+= -I$(MODULE)/$(SAT_DIR)/Unicable
+# no Unicable support
 ccflags-y+= -I$(MODULE)/$(SAT_DIR)/$(SAT_TUNER)
 # SAT compilation flags
 ccflags-y+= -DSATELLITE_FRONT_END -DSAT_TUNER_SILABS -DSAT_TUNER_$(SAT_TUNER)
-ccflags-y+= -DUNICABLE_COMPATIBLE -DNO_FLOATS_ALLOWED
+ccflags-y+= -DNO_FLOATS_ALLOWED
+#ccflags-y+= -DUNICABLE_COMPATIBLE
+# no Unicable support
+
 #object file for SAT tuner
 OBJFILES += $(SAT_DIR)/$(SAT_TUNER)/SiLabs_L1_RF_$(SAT_TUNER)_API.o
 #object file for SAT tuner wrapper
 OBJFILES += $(SAT_DIR)/SiLabs_SAT_Tuner_API.o
 #object file for SAT Unicable
-OBJFILES += $(SAT_DIR)/Unicable/SiLabs_Unicable_API.o
+#OBJFILES += $(SAT_DIR)/Unicable/SiLabs_Unicable_API.o
+# no Unicable support
 endif
 ifneq (none, $(SAT_LNB))
 ccflags-y+= -D$(SAT_LNB)_COMPATIBLE
