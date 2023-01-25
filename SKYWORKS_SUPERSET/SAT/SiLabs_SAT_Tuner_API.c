@@ -469,7 +469,7 @@ signed   int   SiLabs_SAT_Tuner_HW_Init        (SILABS_SAT_TUNER_Context *silabs
 #endif /* SAT_TUNER_RDA5816S */
 #ifdef    SAT_TUNER_RDA5816SD
   if (silabs_tuner->sat_tuner_code == 0x58165D) {
-    SiTRACE("SiLabs_SAT_Tuner_HW_Init for RDA5816 at i2c 0x%02x\n", silabs_tuner->RDA5816SD_Tuner[silabs_tuner->tuner_index]->i2c->address);
+    SiTRACE("SiLabs_SAT_Tuner_HW_Init for RDA5816D at i2c 0x%02x\n", silabs_tuner->RDA5816SD_Tuner[silabs_tuner->tuner_index]->i2c->address);
     return_code = L1_RF_RDA5816SD_InitAfterReset(silabs_tuner->RDA5816SD_Tuner[silabs_tuner->tuner_index]);
   }
 #endif /* SAT_TUNER_RDA5816SD */

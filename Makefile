@@ -35,12 +35,17 @@ ccflags-y+= -DTS_CROSSBAR
 # Check Si2183_L2_API.c file for possible flags
 # (between change log and first function implementation)
 #-------------------------------------------------------------
-ccflags-y+= -DSi2180_A55_COMPATIBLE
-ccflags-y+= -DSi2180_A50_COMPATIBLE
+
 ccflags-y+= -DSi2183_B60_COMPATIBLE
 ccflags-y+= -DSi2183_B5A_COMPATIBLE
 ccflags-y+= -DSi2183_A55_COMPATIBLE
 ccflags-y+= -DSi2183_A50_COMPATIBLE
+ccflags-y+= -DSi2183_ES_COMPATIBLE
+ccflags-y+= -DSi2180_B60_COMPATIBLE
+ccflags-y+= -DSi2180_A55_COMPATIBLE
+ccflags-y+= -DSi2180_A50_COMPATIBLE
+ccflags-y+= -DSi2167B_20_COMPATIBLE
+ccflags-y+= -DSi2169_30_COMPATIBLE
 # ---<porting>--- End of FWs selection
 #=============================================================
 #=============================================================

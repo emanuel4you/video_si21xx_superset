@@ -20,8 +20,6 @@ struct dvb_adapter myadapter;
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 
 static struct si2183_config my_si2183_config = {
-	/* the demodulators's i2c addresses */
-	.demod_address = { 0x64, 0x67 },
 	.reset_gpiod = NULL,
 };
 
@@ -107,6 +105,7 @@ static int si2183_fe_probe(struct platform_device *pdev) {
 		return -1;
 	
 	myfrontend = si2183_attach(&my_si2183_config, si2183_i2c_adapter);
+	
 	printk(KERN_INFO "%s_dev: %s: - i2c adapter added!\n", DRIVER_NAME, __FUNCTION__);
 
 	ret = dvb_register_adapter(&myadapter, "My Adapter", THIS_MODULE, dev, adapter_nr);
@@ -115,6 +114,7 @@ static int si2183_fe_probe(struct platform_device *pdev) {
 	ret = dvb_register_frontend(&myadapter, myfrontend);
 	printk(KERN_INFO "%s_dev: %s: dvb_register_frontend ret=%d\n", DRIVER_NAME, __FUNCTION__, ret);
 	
+	dvb_frontend_resume(myfrontend);
 	
 	return 0;
 }
@@ -161,6 +161,8 @@ static int __init si2183_fe_init(void) {
 static void __exit si2183_fe_exit(void) {
 	dvb_unregister_adapter(&myadapter);
 	dvb_unregister_frontend(myfrontend);
+	dvb_frontend_suspend(myfrontend);
+	//dvb_frontend_detach(myfrontend);
 	gpiod_put(my_si2183_config.reset_gpiod);
 	
 	printk(KERN_INFO "%s_dev: %s: - Unload driver", DRIVER_NAME, __FUNCTION__);
